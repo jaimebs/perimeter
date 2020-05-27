@@ -1,6 +1,6 @@
 function initMap() {
-  let btnPronto = document.getElementById('btnPronto');
-  let btnPolygon = document.getElementById('btnPolygon');
+  let btnConcluded = document.getElementById('btnConcluded');
+  let btnNew = document.getElementById('btnNew');
   let paths = [];
   let latitude = 0;
   let longitude = 0;
@@ -47,11 +47,11 @@ function initMap() {
     showArray();
   });
 
-  btnPronto.addEventListener('click', ()=>{
+  btnConcluded.addEventListener('click', ()=>{
     drawingManager.setDrawingMode(null);
   })
 
-  btnPolygon.addEventListener('click', ()=>{
+  btnNew.addEventListener('click', ()=>{
     drawingManager.setDrawingMode(google.maps.drawing.OverlayType.POLYGON);
   })
 
