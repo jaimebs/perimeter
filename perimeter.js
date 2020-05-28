@@ -1,4 +1,35 @@
+let drawingManager;
+let all_overlays = [];
+let selectedShape;
+
+function clearSelection() {
+  if (selectedShape) {
+    selectedShape.setEditable(false);
+    selectedShape = null;
+  }
+}
+
+function setSelection(shape) {
+  clearSelection();
+  selectedShape = shape;
+  shape.setEditable(true);
+}
+
+function deleteSelectedShape() {
+  if (selectedShape) {
+    selectedShape.setMap(null);
+  }
+}
+
+function deleteAllShape() {
+  for (var i = 0; i < all_overlays.length; i++) {
+    all_overlays[i].overlay.setMap(null);
+  }
+  all_overlays = [];
+}
+
 function initMap() {
+
   let btnConcluded = document.getElementById('btnConcluded');
   let btnNew = document.getElementById('btnNew');
   let paths = [];
@@ -23,32 +54,48 @@ function initMap() {
     zoom: 13
   });
 
-  var drawingManager = new google.maps.drawing.DrawingManager({
+  drawingManager = new google.maps.drawing.DrawingManager({
     // drawingMode: google.maps.drawing.OverlayType.MAKER,
     drawingControl: false,
     drawingControlOptions: {
       position: google.maps.ControlPosition.TOP_CENTER,
       drawingModes: ['polygon']
     },
+    markerOptions: {
+      draggable: false,
+      editable: true,
+    },
+    polylineOptions: {
+      editable: true
+    },
   });
   drawingManager.setMap(map);
 
-  // google.maps.event.addListener(drawingManager, 'overlaycomplete', function(e) {
-  //   console.log(e.type);
-  //   console.log(e.getPath().getArray().toString());
-    
-  // })
+  google.maps.event.addListener(drawingManager, 'overlaycomplete', function (polygon) {
+    // var coordinates = (polygon.getPath().getArray().toString());
+    // console.log(coordinates);
+    // paths.push(coordinates)
 
-  google.maps.event.addListener(drawingManager, 'polygoncomplete', function (polygon) {
-    var coordinates = (polygon.getPath().getArray().toString());
-    console.log(coordinates);
-    paths.push(coordinates)
+    all_overlays.push(polygon);
 
-    showArray();
+    var newShape = polygon.overlay;
+    newShape.type = polygon.type;
+
+    google.maps.event.addListener(newShape, 'click', function() {
+      setSelection(newShape);
+    });
+    setSelection(newShape);
+
+    drawingManager.setDrawingMode(null);
+
+    // createPolygon(polygon.getPath())
+
+    // showArray();
   });
 
   btnConcluded.addEventListener('click', ()=>{
     drawingManager.setDrawingMode(null);
+    clearSelection();
   })
 
   btnNew.addEventListener('click', ()=>{
@@ -57,8 +104,10 @@ function initMap() {
 
   function showArray(){
     console.log(paths);
-    
   }
 
   getLocation();
+
+  google.maps.event.addListener(map, 'click', clearSelection);
+  google.maps.event.addDomListener(document.getElementById('btnDeleteSelected'), 'click', deleteSelectedShape);
 }
